@@ -13,8 +13,11 @@ export default function HomePage() {
     >
       <div className="flex flex-col items-center justify-center h-full bg-black bg-opacity-50 text-white text-center">
         <h1
-          className="text-7xl font-bold mb-4 capitalize text-orange-600"
-          style={{ fontFamily: "cursive" }}
+          className="text-lg-7xl font-bold mb-4 capitalize text-orange-600"
+          style={{
+            fontSize: { base: "lg", md: "7rem" },
+            fontFamily: "cursive",
+          }}
         >
           TheDeesLoveStory
         </h1>
