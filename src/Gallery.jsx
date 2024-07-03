@@ -2,9 +2,21 @@ import React, { useEffect, useState } from "react";
 import ImageGallery from "react-image-gallery";
 import "react-image-gallery/styles/css/image-gallery.css";
 import axios from "axios";
+import mainBg from "./assets/mainbg.jpeg";
+import mainBg1 from "./assets/mainbg1.jpeg";
 
 const Gallery = () => {
-  const [images, setImages] = useState([]);
+  const [images, setImages] = useState([
+    {
+      original: mainBg,
+      thumbnail: mainBg,
+    },
+    {
+      original: mainBg1,
+      thumbnail: mainBg1,
+    },
+  ]);
+  const [thumbnailPosition, setThumbnailPosition] = useState("right");
 
   useEffect(() => {
     const token = "46xFCBZZvxwJJYKbmN53dY5FW3GndLzzzORjWs3k";
@@ -14,10 +26,10 @@ const Gallery = () => {
     const fetchImages = async () => {
       try {
         const response = await axios.get(
-          "https://api.cloudflare.com/client/v4/accounts/bbbbde9d437b7d633c9b7d9806510453/images/v1",
+          `https://api.cloudflare.com/client/v4/accounts/${accID}/images/v1`,
           {
             headers: {
-              Authorization: "Bearer 46xFCBZZvxwJJYKbmN53dY5FW3GndLzzzORjWs3k",
+              Authorization: `Bearer ${token}`,
             },
           }
         );
@@ -37,13 +49,28 @@ const Gallery = () => {
     fetchImages();
   }, []);
 
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setThumbnailPosition("bottom");
+      } else {
+        setThumbnailPosition("right");
+      }
+    };
+
+    handleResize(); // Check initial screen size
+    window.addEventListener("resize", handleResize);
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
-    <div className="h-screen w-screen">
+    <div className="min-h-screen w-screen flex flex-col">
       <ImageGallery
         items={images}
         lazyLoad
         showNav={false}
-        thumbnailPosition="right"
+        thumbnailPosition={thumbnailPosition}
         autoPlay={true}
         slideInterval="5000"
       />
