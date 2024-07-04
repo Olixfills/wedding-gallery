@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import mainBg from "./assets/mainbg.jpeg";
 
@@ -8,6 +8,7 @@ export default function HomePage() {
   const [message, setMessage] = useState("");
   const [preview, setPreview] = useState(null);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const uploadImage = async () => {
     if (!file) return;
 
@@ -28,7 +29,6 @@ export default function HomePage() {
 
       if (response.ok) {
         setMessage("Image uploaded successfully!");
-        setFile(null);
       } else {
         setMessage("Failed to upload image.");
       }
@@ -36,6 +36,7 @@ export default function HomePage() {
       setMessage("An error occurred while uploading the image.");
     } finally {
       setLoading(false);
+      setFile(null);
     }
   };
 
@@ -52,8 +53,13 @@ export default function HomePage() {
     } else {
       setPreview(null);
     }
-    uploadImage();
   };
+
+  useEffect(() => {
+    if (file) {
+      uploadImage();
+    }
+  }, [file, uploadImage]);
 
   return (
     <div
