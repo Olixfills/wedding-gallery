@@ -1,54 +1,45 @@
+import axios from "axios";
+// eslint-disable-next-line no-unused-vars
 import React, { useEffect, useState } from "react";
 import ImageGallery from "react-image-gallery";
 import "react-image-gallery/styles/css/image-gallery.css";
-import axios from "axios";
-import mainBg from "./assets/mainbg.jpeg";
-import mainBg1 from "./assets/mainbg1.jpeg";
 
 const Gallery = () => {
-  const [images, setImages] = useState([
-    {
-      original: mainBg,
-      thumbnail: mainBg,
-    },
-    {
-      original: mainBg1,
-      thumbnail: mainBg1,
-    },
-  ]);
+  const [images, setImages] = useState([]);
   const [thumbnailPosition, setThumbnailPosition] = useState("right");
 
+  // Utility function to randomize an array
+  const randomizeArray = (array) => {
+    return array.sort(() => Math.random() - 0.5);
+  };
+
+  // Fetch images from server
+  const fetchImages = async () => {
+    try {
+      const response = await axios.get(
+        `https://ola-image-server.onrender.com/fetch/images`
+      );
+      const fetchedImages = response?.data?.response?.map((item) => ({
+        ...item,
+        original: item.variants[0],
+        thumbnail: item.variants[0],
+      }));
+
+      setImages(randomizeArray(fetchedImages));
+    } catch (error) {
+      console.error("Error fetching images:", error);
+    }
+  };
+
+  // Initial fetch and set interval for fetching every 5 minutes
   useEffect(() => {
-    const token = "46xFCBZZvxwJJYKbmN53dY5FW3GndLzzzORjWs3k";
-    const accID = "bbbbde9d437b7d633c9b7d9806510453";
-    const hash = "wQ3QyOndpXrt0q_kgZAd5A";
-
-    const fetchImages = async () => {
-      try {
-        const response = await axios.get(
-          `https://api.cloudflare.com/client/v4/accounts/${accID}/images/v1`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        console.log(response.data.result.images);
-        setImages(
-          response?.data?.result?.images?.map((item) => ({
-            ...item,
-            original: item.imageUrl,
-            thumbnail: item.thumbnailUrl,
-          }))
-        );
-      } catch (error) {
-        console.error("Error fetching images:", error);
-      }
-    };
-
     fetchImages();
+    const intervalId = setInterval(fetchImages, 300000); // 300000 ms = 5 minutes
+
+    return () => clearInterval(intervalId); // Cleanup interval on component unmount
   }, []);
 
+  // Handle thumbnail position based on screen width
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 768) {
@@ -66,14 +57,20 @@ const Gallery = () => {
 
   return (
     <div className="min-h-screen w-screen flex flex-col">
-      <ImageGallery
-        items={images}
-        lazyLoad
-        showNav={false}
-        thumbnailPosition={thumbnailPosition}
-        autoPlay={true}
-        slideInterval="5000"
-      />
+      {!images[0] ? (
+        <div className="min-h-screen w-screen flex justify-center items-center">
+          <h6>Loading...</h6>
+        </div>
+      ) : (
+        <ImageGallery
+          items={images}
+          lazyLoad
+          showNav={false}
+          thumbnailPosition={thumbnailPosition}
+          autoPlay={true}
+          slideInterval={3000}
+        />
+      )}
     </div>
   );
 };
